@@ -1,0 +1,32 @@
+---
+- name: Create vault dir
+  file:
+    path: "{{ project_root ~ '/vault' }}"
+    state: directory
+
+- name: Copy docker-compose.yml file
+  copy:
+    src: docker-compose.yml
+    dest: "{{ project_root ~ '/vault/docker-compose.yml' }}"
+
+- name: Create vault config
+  docker_config:
+    name: "{{ 'vault_config_v' ~ vault.config.version }}"
+    data: "{{ lookup('file', role_path ~ '/files/' ~ vault.config.filename, convert_data=False) | string }}"
+    state: present
+  changed_when: false
+  no_log: true
+
+- name: Deploy vault
+  docker_stack:
+    name: "vault"
+    compose:
+      - "{{ project_root ~ '/vault/docker-compose.yml' }}"
+    state: present
+  changed_when: false
+  environment:
+    REPLICAS: "{{ vault.replicas }}"
+    VAULT_CONFIG_NAME: "{{ 'vault_config_v' ~ vault.config.version }}"
+    VAULT_PORT: "{{ vault.port }}"
+    VAULT_URL: "{{ vault.url }}"
+    VAULT_VERSION: "{{ vault.version }}"

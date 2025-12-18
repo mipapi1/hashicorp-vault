@@ -1,0 +1,8 @@
+---
+collections:
+  - name: community.docker
+
+roles:
+  - name: ansible-dockerswarm
+    src: https://github.com/mipapi1/ansible-dockerswarm.git
+    version: master

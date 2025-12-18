@@ -1,0 +1,14 @@
+---
+# Traefik vars
+traefik:
+  version: "3"
+  dashboard:
+    enable: true
+    port: 8080
+  log_level: "DEBUG"
+  middlewares_auth:
+    salt: "{{ vault_traefik.middlewares_auth.salt }}"
+    users: "{{ vault_traefik.middlewares_auth.users }}"
+    version: "{{ vault_traefik.middlewares_auth.version }}"
+  replicas: 1
+  url: "vault-traefik.com"
