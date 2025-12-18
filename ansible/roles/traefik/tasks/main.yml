@@ -1,0 +1,71 @@
+---
+- name: Create Traefik project directory
+  file:
+    path: "{{ project_root ~ '/traefik' }}"
+    state: directory
+
+- name: Copy docker-compose.yml file
+  copy:
+    src: docker-compose.yml
+    dest: "{{ project_root ~ '/traefik/docker-compose.yml' }}"
+
+- name: Create Traefik users file for middleware authentication
+  htpasswd:
+    path: "{{ project_root ~ '/users' }}"
+    name: "{{ item.key }}"
+    password: "{{ item.value | string | password_hash('md5', traefik.middlewares_auth.salt) }}"
+    crypt_scheme: "plaintext"
+  with_dict: "{{ traefik.middlewares_auth.users }}"
+  no_log: true
+
+- name: Read Traefik users data from file
+  slurp:
+    src: "{{ project_root ~ '/users' }}"
+  register: users
+  no_log: true
+
+- name: Create traefik middlewares users
+  docker_secret:
+    name: "{{ traefik.middlewares_auth.middlewares_users_secret_name }}"
+    data: "{{ users['content'] | b64decode }}"
+    state: present
+  no_log: true
+
+- name: Delete temporary users file
+  file:
+    path: "{{ project_root ~ '/users' }}"
+    state: absent
+  no_log: true
+
+- name: Create Cloudflare Traefik API token secret
+  docker_secret:
+    name: "{{ traefik.cloudflare.secret_name }}"
+    data: "{{ traefik.cloudflare.api_token }}"
+    state: present
+  no_log: true
+
+- name: Deploy Traefik stack
+  docker_stack:
+    name: "traefik"
+    compose:
+      - "{{ project_root ~ '/traefik/docker-compose.yml' }}"
+    state: present
+  environment:
+    REPLICAS: "{{ traefik.replicas }}"
+    TRAEFIK_MIDDLEWARES_USERS_NAME: "{{ traefik.middlewares_auth.middlewares_users_secret_name }}"
+    TRAEFIK_DASHBOARD_ENABLE: "{{ traefik.dashboard.enable }}"
+    TRAEFIK_DASHBOARD_PORT: "{{ traefik.dashboard.port }}"
+    TRAEFIK_LOG_LEVEL: "{{ traefik.log_level }}"
+    TRAEFIK_URL: "{{ traefik.url }}"
+    TRAEFIK_VERSION: "{{ traefik.version }}"
+    TRAEFIK_ACME_EMAIL: "{{ traefik.acme.email }}"
+    TRAEFIK_ACME_STORAGE_PATH: "{{ traefik.acme.storage_path | default(project_root ~ '/traefik/acme') }}"
+    TRAEFIK_ACME_RESOLVER: "{{ traefik.acme.resolver | default('certificato') }}"
+    CF_API_EMAIL: "{{ traefik.cloudflare.api_email }}"
+    CF_API_TOKEN_FILE: "/run/secrets/{{ traefik.cloudflare.secret_name }}"
+    TRAEFIK_METRICS_ENABLED: "{{ traefik.metrics.enabled | default(true) }}"
+    TRAEFIK_METRICS_PORT: "{{ traefik.metrics.port | default(8082) }}"
+    TRAEFIK_CERT_PATH: "{{ traefik.cert_path }}"
+    TRAEFIK_LOGS_PATH: "{{ traefik.logs_path }}"
+    TRAEFIK_PROXY_NETWORK: "{{ traefik.proxy_network }}"
+    CF_API_TOKEN_SECRET_NAME: "{{ traefik.cloudflare.secret_name}}"

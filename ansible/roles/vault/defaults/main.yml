@@ -1,0 +1,11 @@
+---
+# Vault vars
+vault:
+  config:
+    filename: "vault.json"
+    version: 1
+  port: 8200
+  replicas: 1
+  url: "vault.test.com"
+  version: "1.5.3"
+

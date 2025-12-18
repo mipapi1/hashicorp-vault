@@ -1,0 +1,57 @@
+---
+- name: "Provision Docker Swarm Cluster"
+  become: yes
+  hosts: all
+  vars:
+    project_root: "{{ hostvars[groups['docker_swarm_manager'][0]].project_root }}"
+  tasks:
+    - name: "Provision Docker Swarm Cluster"
+      import_role:
+        name: ansible-dockerswarm
+      tags: docker_swarm
+
+- name: Deploy application
+  become: yes
+  hosts: docker_swarm_manager
+  gather_facts: true
+  vars:
+    app_venv_path: /opt/app-venv
+    ansible_python_interpreter: "{{ app_venv_path }}/bin/python"
+  tasks:
+
+    # Ensure virtualenv support is installed
+    - name: Ensure python3-venv is installed
+      package:
+        name: python3-venv
+        state: present
+
+    # Create virtualenv for the applicationf
+    - name: Create virtualenv for application
+      command: python3 -m venv {{ app_venv_path }}
+      args:
+        creates: "{{ app_venv_path }}/bin/activate"
+
+    # Upgrade pip in virtualenv
+    - name: Upgrade pip in virtualenv
+      pip:
+        name: pip
+        virtualenv: "{{ app_venv_path }}"
+        state: latest
+
+    # Install all required Python dependencies inside virtualenv
+    - name: Install Python dependencies in virtualenv
+      pip:
+        name:
+          - jsondiff
+          - passlib
+          - pyyaml
+          - docker
+        virtualenv: "{{ app_venv_path }}"
+        state: present
+
+    - import_role:
+        name: traefik
+      tags: traefik
+    - import_role:
+        name: vault
+      tags: vault

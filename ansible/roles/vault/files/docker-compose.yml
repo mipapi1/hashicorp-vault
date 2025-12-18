@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  vault:
+    image: hashicorp/vault:${VAULT_VERSION}
+    command: ["vault", "server", "-config=/local.json"]
+    configs:
+      - source: vault_config
+        target: /local.json
+    environment:
+      VAULT_ADDR: "http://127.0.0.1:${VAULT_PORT}"
+      VAULT_API_ADDR: "http://127.0.0.1:${VAULT_PORT}"
+      VAULT_LOG_LEVEL: "info"
+    networks:
+      - proxy
+    volumes:
+      - vault_file:/vault/file
+      - vault_policies:/vault/policies
+      - vault_config:/vault/config
+    deploy:
+      replicas: ${REPLICAS}
+      placement:
+        constraints:
+          - node.labels.vault == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.vault.rule=Host(`${VAULT_URL}`)"
+        - "traefik.http.routers.vault.entrypoints=websecure"
+        - "traefik.http.routers.vault.tls=true"
+        - "traefik.http.routers.vault.tls.certresolver=cloudflare"
+        - "traefik.http.services.vault.loadbalancer.server.port=${VAULT_PORT}"
+
+configs:
+  vault_config:
+    external: true
+    name: ${VAULT_CONFIG_NAME}
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+
+volumes:
+  vault_config:
+  vault_file:
+  vault_policies:
