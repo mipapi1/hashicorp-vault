@@ -1,0 +1,13 @@
+[production]
+swarm-01 ansible_host=192.168.1.36
+
+[docker_engine:children]
+production
+
+[docker_engine:vars]
+ansible_user=papi
+
+[docker_swarm_manager]
+swarm-01 swarm_labels='["traefik", "vault"]'
+
+[docker_swarm_worker]

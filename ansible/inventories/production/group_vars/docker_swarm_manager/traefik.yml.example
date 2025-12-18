@@ -1,0 +1,23 @@
+vault_traefik:
+  traefik_url: "traefik-url-placeholder.com"
+  middlewares_auth:
+    version: 1
+    salt: "papi1"
+    users:
+      admin: "adminpassword"
+    middlewares_users_secret_name: "traefik_users"
+  acme:
+    email: "<Email>" # Cloudflare email
+    resolver: "certificato"
+    storage_path: "/acme"        # Mounted volume for ACME
+  cloudflare:
+    api_email: "<Email>" # Cloudflare email
+    secret_name: "cloudflare_api_token"
+    api_token: "cloudflare-dns-token-goes-here!"  
+    ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+    ca_server_staging: "https://acme-staging-v02.api.letsencrypt.org/directory"
+  metrics:
+    enabled: true
+    port: 8082
+  cert_path: "/certs"            # Optional if you mount custom certs
+  logs_path: "/var/log/traefik"  # Optional logs

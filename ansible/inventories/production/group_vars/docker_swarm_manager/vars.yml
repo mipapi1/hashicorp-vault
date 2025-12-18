@@ -1,0 +1,42 @@
+---
+project_root: "/opt/devops"
+
+# Traefik vars
+traefik:
+  version: "3"
+  replicas: 1
+  url: "{{ vault_traefik.traefik_url }}"
+  log_level: "INFO"
+  dashboard:
+    enable: true
+    port: 8080
+  middlewares_auth:
+    salt: "{{ vault_traefik.middlewares_auth.salt }}"
+    users: "{{ vault_traefik.middlewares_auth.users }}"
+    version: "{{ vault_traefik.middlewares_auth.version }}"
+    middlewares_users_secret_name: "{{ vault_traefik.middlewares_auth.middlewares_users_secret_name }}"
+  acme:
+    email: "{{ vault_traefik.acme.email }}"
+    resolver: "{{ vault_traefik.acme.resolver }}"
+    storage_path: "{{ vault_traefik.acme.storage_path }}"
+  cloudflare: 
+    api_email: "{{ vault_traefik.cloudflare.api_email }}"
+    secret_name: "{{ vault_traefik.cloudflare.secret_name }}"
+    api_token: "{{ vault_traefik.cloudflare.api_token }}"
+    ca_server: "{{ vault_traefik.cloudflare.ca_server }}"
+  metrics:
+    enabled: true
+    port: 8082
+  cert_path: "{{ vault_traefik.cert_path }}"
+  logs_path: "{{ vault_traefik.logs_path }}"
+  proxy_network: "proxy"
+  
+# Vault vars
+vault:
+  config:
+    filename: "local.json"
+    version: 1
+  port: 8200
+  replicas: 1
+  url: "{{ vault_config.url }}"
+  version: "1.21.1"
