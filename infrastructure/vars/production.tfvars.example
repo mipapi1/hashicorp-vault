@@ -1,0 +1,16 @@
+proxmox_api_url      = "https://192.168.1.70:8006/api2/json"
+proxmox_api_token_id = "terraform-prov@pve!terraform-provisioner=<APITOKEN>"
+pm_tls_insecure = true
+
+vms = {
+  jumpbox = {
+    name                        = "vault-prod01"
+    vm_id                       = 105
+    node_name                   = "proxmox03"
+    ip                          = "192.168.1.5/22"
+    vcpu                        = 2
+    memory                      = 8192
+    template_vm_id              = 9000
+    disk_size                   = 60  
+  }
+}
