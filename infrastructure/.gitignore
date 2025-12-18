@@ -1,0 +1,43 @@
+# SSH keys
+id_ed25519.pub
+!id_ed25519.pub.example
+*.pem
+*.key
+
+# Terraform state files
+*.tfstate
+*.tfstate.backup
+crash.log
+
+# Terraform lock and plan files
+.terraform.lock.hcl
+*.tfplan
+
+# Terraform variable files
+*.tfvars       # Ignore real variable files containing secrets
+!*.tfvars.example  # Allow example/template versions
+
+# Override files (custom local settings)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform directories
+.terraform/
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*~
+
+# MacOS files
+.DS_Store
+
+# Linux files
+*.lock
