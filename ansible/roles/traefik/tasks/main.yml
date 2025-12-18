@@ -9,14 +9,14 @@
     src: docker-compose.yml
     dest: "{{ project_root ~ '/traefik/docker-compose.yml' }}"
 
-- name: Create Traefik users file for middleware
+- name: Create Traefik users file for middleware authentication
   htpasswd:
     path: "{{ project_root ~ '/users' }}"
     name: "{{ item.key }}"
     password: "{{ item.value | string | password_hash('md5', traefik.middlewares_auth.salt) }}"
     crypt_scheme: "plaintext"
   with_dict: "{{ traefik.middlewares_auth.users }}"
-  no_log: false
+  no_log: true
 
 - name: Read Traefik users data from file
   slurp:
@@ -29,7 +29,7 @@
     name: "{{ traefik.middlewares_auth.middlewares_users_secret_name }}"
     data: "{{ users['content'] | b64decode }}"
     state: present
-  no_log: false
+  no_log: true
 
 - name: Delete temporary users file
   file:
