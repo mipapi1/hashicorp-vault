@@ -49,10 +49,10 @@
         name: traefik
       tags: traefik
       vars:
-        ansible_python_interpreter: "{{ app_venv_path }}/bin/python"  # Only here if traefik role needs it
+        ansible_python_interpreter: "{{ app_venv_path }}/bin/python"  
 
     - import_role:
         name: vault
       tags: vault
       vars:
-        ansible_python_interpreter: "{{ app_venv_path }}/bin/python"  # Only here if vault role needs it
+        ansible_python_interpreter: "{{ app_venv_path }}/bin/python"  
