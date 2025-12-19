@@ -16,34 +16,30 @@
   gather_facts: true
   vars:
     app_venv_path: /opt/app-venv
-    ansible_python_interpreter: "{{ app_venv_path }}/bin/python"
-  tasks:
 
-    # Ensure virtualenv support is installed
+  tasks:
     - name: Ensure python3-venv is installed
       package:
         name: python3-venv
         state: present
 
-    # Create virtualenv for the applicationf
     - name: Create virtualenv for application
       command: python3 -m venv {{ app_venv_path }}
       args:
         creates: "{{ app_venv_path }}/bin/activate"
 
-    # Upgrade pip in virtualenv
     - name: Upgrade pip in virtualenv
       pip:
         name: pip
         virtualenv: "{{ app_venv_path }}"
         state: latest
 
-    # Install all required Python dependencies inside virtualenv
     - name: Install Python dependencies in virtualenv
       pip:
         name:
           - jsondiff
           - passlib
+          - packaging
           - pyyaml
           - docker
         virtualenv: "{{ app_venv_path }}"
@@ -52,6 +48,11 @@
     - import_role:
         name: traefik
       tags: traefik
+      vars:
+        ansible_python_interpreter: "{{ app_venv_path }}/bin/python"  # Only here if traefik role needs it
+
     - import_role:
         name: vault
       tags: vault
+      vars:
+        ansible_python_interpreter: "{{ app_venv_path }}/bin/python"  # Only here if vault role needs it
