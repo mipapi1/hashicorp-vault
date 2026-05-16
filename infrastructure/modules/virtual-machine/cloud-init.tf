@@ -11,7 +11,7 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
   source_raw {
     data = <<-EOF
     #cloud-config
-    hostname: vault-prod01
+    hostname: ${var.name}
     timezone: America/New_York
     users:
       - default
