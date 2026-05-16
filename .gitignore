@@ -39,9 +39,17 @@ terraform.rc
 cf-token
 cf-token.*
 
-# =========================
-# Ansible / Galaxy
-# =========================
+# Ansible / Galaxy #
+
+# Ansible group_vars containing secrets (use the *.example versions as templates)
+ansible/inventories/production/group_vars/docker_swarm_manager/traefik.yml
+ansible/inventories/production/group_vars/docker_swarm_manager/vault.yml
+!ansible/inventories/**/*.example
+
+# Ansible vault password files
+.vault_pass
+*.vault_pass
+vault-password*
 
 # Galaxy-installed roles
 /roles/ansible-dockerswarm/
