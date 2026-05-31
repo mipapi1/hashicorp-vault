@@ -2,7 +2,7 @@
 
 HashiCorp Vault deployed on Docker Swarm, fronted by Traefik with Let's Encrypt + Cloudflare DNS for automated TLS.
 
-VM provisioning is handled by the standalone [proxmox-infrastructure](../proxmox-infrastructure) project. This repo covers only the Ansible layer that configures the host once it exists.
+VM provisioning is handled by the standalone [proxmox-infrastructure](https://github.com/mipapi1/proxmox-infrastructure) project. This repo covers only the Ansible layer that configures the host once it exists.
 
 ---
 
