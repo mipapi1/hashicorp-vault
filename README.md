@@ -2,50 +2,32 @@
 
 HashiCorp Vault deployed on Docker Swarm, fronted by Traefik with Let's Encrypt + Cloudflare DNS for automated TLS.
 
-The repo has two independent layers:
+VM provisioning is handled by the standalone [proxmox-infrastructure](../proxmox-infrastructure) project. This repo covers only the Ansible layer that configures the host once it exists.
 
-- **`infrastructure/`** — Terraform that provisions an Ubuntu VM on Proxmox (cloud-init based), which hosts the Swarm node.
-- **`ansible/`** — Ansible that installs Docker Swarm, deploys Traefik, and deploys Vault.
+---
 
-You can use both together, or skip Terraform and point Ansible at a VM you already have.
+## VM Spec
+
+| Field | Value |
+|---|---|
+| Name | `vault-prod01` |
+| Node | `proxmox02` |
+| IP | `10.42.1.36/22` |
+| vCPU | 1 |
+| Memory | 2048 MB |
+| Disk | 64 GB |
 
 ---
 
 ## Prerequisites
 
 - Ansible 2.14+ and `ansible-galaxy`
-- (Terraform path only) Terraform 1.5+ and a Proxmox node with an API token + a cloud-init template VM
 - A Cloudflare account + API token with DNS edit permissions for your domain
-- SSH access to the target host as a sudo-capable user
+- SSH access to the target host as a sudo-capable user (`papi`)
 
 ---
 
-## Option A — Full deploy (Terraform → Ansible)
-
-Provisions the VM on Proxmox, then configures it.
-
-```bash
-# 1. Copy the variable templates
-cd infrastructure
-cp vars/production.tfvars.example vars/production.tfvars
-cp id_ed25519.pub.example id_ed25519.pub  # or replace with your real public key
-```
-
-You'll need to edit `vars/production.tfvars` to set your Proxmox URL, API token, and VM specs.
-
-```bash
-# 2. Provision the VM
-terraform init
-terraform apply -var-file=vars/production.tfvars
-```
-
-Then configure Ansible (see Option B steps 1–3) and run the playbook.
-
----
-
-## Option B — Ansible only (bring your own host)
-
-Use this if your VM/server already exists.
+## Deploy
 
 ```bash
 cd ansible
@@ -54,9 +36,9 @@ cd ansible
 ansible-galaxy role install -r ./roles/requirements.yml
 ```
 
-**2.** You'll need to edit `inventories/production/hosts` to set `ansible_host` and `ansible_user` for your target machine.
+**2.** Edit `inventories/production/hosts` to set `ansible_host` and `ansible_user` for your target machine.
 
-**3.** Copy the secret templates, then edit each one with your real values:
+**3.** Copy the secret templates, then fill in your real values:
 
 ```bash
 cp inventories/production/group_vars/docker_swarm_manager/traefik.yml.example \
@@ -65,8 +47,8 @@ cp inventories/production/group_vars/docker_swarm_manager/vault.yml.example \
    inventories/production/group_vars/docker_swarm_manager/vault.yml
 ```
 
-- Edit `traefik.yml` — Cloudflare API token, admin credentials, your domain
-- Edit `vault.yml` — your Vault URL
+- `traefik.yml` — Cloudflare API token, admin credentials, your domain
+- `vault.yml` — your Vault URL
 
 ```bash
 # 4. Deploy
@@ -97,5 +79,5 @@ vault operator unseal
 
 ## Notes on secrets
 
-- `*.tfvars`, `traefik.yml`, and `vault.yml` are gitignored. Only the `.example` templates are committed.
+- `traefik.yml` and `vault.yml` are gitignored. Only the `.example` templates are committed.
 - Never commit your Cloudflare API token, Proxmox API token, or unsealed Vault keys.
